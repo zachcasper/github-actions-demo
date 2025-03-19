@@ -14,26 +14,12 @@ name: Compile app.bicep and deploy to AKS
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
 
 env:
   RESOURCE_GROUP: "your-resource-group"
   CLUSTER_NAME: "your-cluster-name"
 
 jobs:
-  echo:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Echo variables
-        run: |
-          echo "Resource group: ${{ env.RESOURCE_GROUP }}"
-          echo "Cluster name:   ${{ env.CLUSTER_NAME }}"
-
-      - name: Echo secrets
-        run: |
-          echo ${{ secrets.AZURE_CREDENTIALS }}
-
   createKubernetesManifest:
     permissions:
       contents: read
