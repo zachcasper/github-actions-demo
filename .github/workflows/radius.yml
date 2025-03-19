@@ -13,25 +13,35 @@ jobs:
       # Checks out the repository this file is in
       - uses: actions/checkout@v4
 
+      - name: Check app.bicep existence
+        uses: thebinaryfelix/check-file-existence-action@v1
+        with:
+          files: 'app.bicep'
+
       - name: Install wget and libicu
+        if: steps.check_files.outputs.exists == 'true'
         run: |
           sudo apt-get update && sudo apt-get install -y wget && sudo apt-get install -y libicu-dev
 
       - name: Install rad CLI
+        if: steps.check_files.outputs.exists == 'true'
         run: |
           wget -q "https://raw.githubusercontent.com/radius-project/radius/main/deploy/install.sh" -O - | /bin/bash
 
       - name: Generate Kubernetes manifest from app.bicep file
+        if: steps.check_files.outputs.exists == 'true'
         run: |
           rad bicep generate-kubernetes-manifest app.bicep -g default -d app.yaml
 
       - name: Load .env file
+        if: steps.check_files.outputs.exists == 'true'
         uses: xom9ikk/dotenv@v2.3.0
         with:
           load-mode: strict
 
       # Logs in with your Azure credentials
       - name: Azure login
+        if: steps.check_files.outputs.exists == 'true'
         id: login
         uses: azure/login@v1.4.3
         with:
@@ -39,12 +49,14 @@ jobs:
 
       # Use kubelogin to configure your kubeconfig for Azure auth
       - name: Set up kubelogin for non-interactive login
+        if: steps.check_files.outputs.exists == 'true'
         uses: azure/use-kubelogin@v1
         with:
           kubelogin-version: 'v0.0.25'
 
       # Retrieves your Azure Kubernetes Service cluster's kubeconfig file
       - name: Get K8s context
+        if: steps.check_files.outputs.exists == 'true'
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ env.RESOURCE_GROUP }}
@@ -52,10 +64,16 @@ jobs:
           admin: 'false'
           use-kubelogin: 'true'
 
-      # Deploys application based on given manifest file
+      # Deploys application based if app.bicep exists in repo
       - name: Deploys application
+        if: steps.check_files.outputs.exists == 'true'
         uses: Azure/k8s-deploy@v4
         with:
           action: deploy
           manifests: app.yaml
 
+      # Delete DeploymentTemplate if app.bicep does not exist in report
+      - name: Delete DeploymentTemplate CR
+        if: steps.check_files.outputs.exists == 'false'
+        run: |
+          kubectl delete deploymenttemplate app.bicep
