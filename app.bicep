@@ -13,8 +13,8 @@ resource demo 'Applications.Core/applications@2023-10-01-preview' = {
   }
 }
 
-resource demo 'Applications.Core/containers@2023-10-01-preview' = {
-  name: 'demo'
+resource frontend 'Applications.Core/containers@2023-10-01-preview' = {
+  name: 'frontend'
   properties: {
     application: demo.id
     container: {
