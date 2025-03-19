@@ -1,7 +1,7 @@
 name: Compile app.bicep and deploy to AKS
 
 on:
-  create
+  push
 
 jobs:
   createKubernetesManifestAndDeploy:
