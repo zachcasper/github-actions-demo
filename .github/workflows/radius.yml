@@ -1,0 +1,106 @@
+# To configure this workflow:
+#
+# 1. Set the following secrets in your repository (instructions for getting these can be found at https://docs.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux):
+#    - AZURE_CLIENT_ID
+#    - AZURE_TENANT_ID
+#    - AZURE_SUBSCRIPTION_ID
+#
+# 2. Set the following environment variables (or replace the values below):
+#    - RESOURCE_GROUP (where your cluster is deployed)
+#    - CLUSTER_NAME (name of your AKS cluster)
+#
+
+name: Compile app.bicep and deploy to AKS
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  RESOURCE_GROUP: "your-resource-group"
+  CLUSTER_NAME: "your-cluster-name"
+
+jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo variables
+        run: |
+          echo "Resource group: ${{ env.RESOURCE_GROUP }}"
+          echo "Cluster name:   ${{ env.CLUSTER_NAME }}"
+
+      - name: Echo secrets
+        run: |
+          echo ${{ secrets.AZURE_CREDENTIALS }}
+
+  createKubernetesManifest:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v4
+
+      - name: wget
+        run: |
+          apt-get update && apt-get install -y wget && apt-get install -y libicu-dev
+
+      - name: Install rad CLI
+        run: |
+          wget -q "https://raw.githubusercontent.com/radius-project/radius/main/deploy/install.sh" -O - | /bin/bash
+
+      - name: Generate Kubernetes manifest from app.bicep file
+        run: |
+          rad bicep generate-kubernetes-manifest app.bicep -g default -d app.yaml
+
+      - name: cat 
+        run: |
+          cat app.yaml
+
+  deploy:
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    needs: createKubernetesManifest
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v4
+
+      - name: Load .env file
+        uses: xom9ikk/dotenv@v2.3.0
+        with:
+          load-mode: strict
+
+      # Logs in with your Azure credentials
+      - name: Azure login
+        id: login
+        uses: azure/login@v1.4.3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Use kubelogin to configure your kubeconfig for Azure auth
+#      - name: Set up kubelogin for non-interactive login
+#        uses: azure/use-kubelogin@v1
+#        with:
+#          kubelogin-version: 'v0.0.25'
+
+      # Retrieves your Azure Kubernetes Service cluster's kubeconfig file
+#      - name: Get K8s context
+#        uses: azure/aks-set-context@v3
+#        with:
+#          resource-group: ${{ env.RESOURCE_GROUP }}
+#          cluster-name: ${{ env.CLUSTER_NAME }}
+#          admin: 'false'
+#          use-kubelogin: 'true'
+
+      # Deploys application based on given manifest file
+#      - name: Deploys application
+#        uses: Azure/k8s-deploy@v4
+#        with:
+#          action: deploy
+#          manifests: app.yaml
+
