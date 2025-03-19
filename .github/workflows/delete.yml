@@ -41,5 +41,5 @@ jobs:
           use-kubelogin: 'true'
 
       - name: Delete DeploymentTemplate CR
-          run: |
-            kubectl delete deploymenttemplate app.bicep
+        run: |
+          kubectl delete deploymenttemplate app.bicep
