@@ -6,7 +6,7 @@ resource environment 'Applications.Core/environments@2023-10-01-preview' existin
   name: 'default'
 }
 
-resource app 'Applications.Core/applications@2023-10-01-preview' = {
+resource demo 'Applications.Core/applications@2023-10-01-preview' = {
   name: 'demo'
   properties: {
     environment: environment.id
@@ -16,7 +16,7 @@ resource app 'Applications.Core/applications@2023-10-01-preview' = {
 resource demo 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'demo'
   properties: {
-    application: application.id
+    application: demo.id
     container: {
       image: 'ghcr.io/radius-project/samples/demo:latest'
       ports: {
