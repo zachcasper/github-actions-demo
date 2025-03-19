@@ -2,13 +2,21 @@
 
 extension radius
 
-@description('The Radius Application ID. Injected automatically by the rad CLI.')
-param application string
+resource environment 'Applications.Core/environments@2023-10-01-preview' existing = {
+  name: default
+}
+
+resource app 'Applications.Core/applications@2023-10-01-preview' = {
+  name: 'demo'
+  properties: {
+    environment: environment
+  }
+}
 
 resource demo 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'demo'
   properties: {
-    application: application
+    application: demo
     container: {
       image: 'ghcr.io/radius-project/samples/demo:latest'
       ports: {
