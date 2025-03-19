@@ -16,7 +16,7 @@ on:
   push:
 
 jobs:
-  createKubernetesManifest:
+  createKubernetesManifestAndDeploy:
     permissions:
       contents: read
       id-token: write
@@ -36,17 +36,6 @@ jobs:
       - name: Generate Kubernetes manifest from app.bicep file
         run: |
           rad bicep generate-kubernetes-manifest app.bicep -g default -d app.yaml
-
-  deploy:
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    needs: createKubernetesManifest
-    steps:
-      # Checks out the repository this file is in
-      - uses: actions/checkout@v4
 
       - name: Load .env file
         uses: xom9ikk/dotenv@v2.3.0
