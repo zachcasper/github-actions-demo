@@ -3,20 +3,20 @@
 extension radius
 
 resource environment 'Applications.Core/environments@2023-10-01-preview' existing = {
-  name: default
+  name: 'default'
 }
 
 resource app 'Applications.Core/applications@2023-10-01-preview' = {
   name: 'demo'
   properties: {
-    environment: environment
+    environment: environment.id
   }
 }
 
 resource demo 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'demo'
   properties: {
-    application: demo
+    application: application.id
     container: {
       image: 'ghcr.io/radius-project/samples/demo:latest'
       ports: {
