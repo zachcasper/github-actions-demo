@@ -31,7 +31,7 @@ jobs:
 
       - name: wget
         run: |
-          apt-get update && apt-get install -y wget && apt-get install -y libicu-dev
+          sudo apt-get update && apt-get install -y wget && apt-get install -y libicu-dev
 
       - name: Install rad CLI
         run: |
