@@ -29,7 +29,7 @@ jobs:
       # Checks out the repository this file is in
       - uses: actions/checkout@v4
 
-      - name: wget
+      - name: Install wget and libicu
         run: |
           sudo apt-get update && sudo apt-get install -y wget && sudo apt-get install -y libicu-dev
 
@@ -40,10 +40,6 @@ jobs:
       - name: Generate Kubernetes manifest from app.bicep file
         run: |
           rad bicep generate-kubernetes-manifest app.bicep -g default -d app.yaml
-
-      - name: cat 
-        run: |
-          cat app.yaml
 
   deploy:
     permissions:
@@ -69,24 +65,24 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Use kubelogin to configure your kubeconfig for Azure auth
-#      - name: Set up kubelogin for non-interactive login
-#        uses: azure/use-kubelogin@v1
-#        with:
-#          kubelogin-version: 'v0.0.25'
+      - name: Set up kubelogin for non-interactive login
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: 'v0.0.25'
 
       # Retrieves your Azure Kubernetes Service cluster's kubeconfig file
-#      - name: Get K8s context
-#        uses: azure/aks-set-context@v3
-#        with:
-#          resource-group: ${{ env.RESOURCE_GROUP }}
-#          cluster-name: ${{ env.CLUSTER_NAME }}
-#          admin: 'false'
-#          use-kubelogin: 'true'
+      - name: Get K8s context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          cluster-name: ${{ env.CLUSTER_NAME }}
+          admin: 'false'
+          use-kubelogin: 'true'
 
       # Deploys application based on given manifest file
-#      - name: Deploys application
-#        uses: Azure/k8s-deploy@v4
-#        with:
-#          action: deploy
-#          manifests: app.yaml
+      - name: Deploys application
+        uses: Azure/k8s-deploy@v4
+        with:
+          action: deploy
+          manifests: app.yaml
 
