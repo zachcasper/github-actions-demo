@@ -1,14 +1,20 @@
-// Import the set of Radius resources (Applications.*) into Bicep
 extension radius
 
-@description('The app ID of your Radius Application. Set automatically by the rad CLI.')
-param application string
-param environment string
+resource environment 'Applications.Core/environments@2023-10-01-preview' existing = {
+  name: 'default'
+}
+
+resource demo 'Applications.Core/applications@2023-10-01-preview' = {
+  name: 'demo'
+  properties: {
+    environment: environment.id
+  }
+}
 
 resource gateway 'Applications.Core/gateways@2023-10-01-preview' = {
   name: 'gateway'
   properties: {
-    application: application
+    application: demo.id
     routes: [
       {
         path: '/'
@@ -21,8 +27,8 @@ resource gateway 'Applications.Core/gateways@2023-10-01-preview' = {
 resource productpage 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'productpage'
   properties: {
-    application: application
-    environment: environment
+    application: demo.id
+    environment: environment.id
     container: {
       image: 'docker.io/istio/examples-bookinfo-productpage-v1:1.20.2'
       ports: {
@@ -51,8 +57,8 @@ resource productpage 'Applications.Core/containers@2023-10-01-preview' = {
 resource ratings 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'ratings'
   properties: {
-    application: application
-    environment: environment
+    application: demo.id
+    environment: environment.id
     container: {
       image: 'docker.io/istio/examples-bookinfo-ratings-v1:1.20.2'
       ports: {
@@ -67,8 +73,8 @@ resource ratings 'Applications.Core/containers@2023-10-01-preview' = {
 resource details 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'details'
   properties: {
-    application: application
-    environment: environment
+    application: demo.id
+    environment: environment.id
     container: {
       image: 'docker.io/istio/examples-bookinfo-details-v1:1.20.2'
       ports: {
@@ -83,8 +89,8 @@ resource details 'Applications.Core/containers@2023-10-01-preview' = {
 resource reviewsv1 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'reviewsv1'
   properties: {
-    application: application
-    environment: environment
+    application: demo.id
+    environment: environment.id
     container: {
       image: 'docker.io/istio/examples-bookinfo-reviews-v1:1.20.2'
       ports: {
@@ -99,8 +105,8 @@ resource reviewsv1 'Applications.Core/containers@2023-10-01-preview' = {
 resource reviewsv2 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'reviewsv2'
   properties: {
-    application: application
-    environment: environment
+    application: demo.id
+    environment: environment.id
     container: {
       image: 'docker.io/istio/examples-bookinfo-reviews-v2:1.20.2'
       ports: {
@@ -120,8 +126,8 @@ resource reviewsv2 'Applications.Core/containers@2023-10-01-preview' = {
 resource reviewsv3 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'reviewsv3'
   properties: {
-    application: application
-    environment: environment
+    application: demo.id
+    environment: environment.id
     container: {
       image: 'docker.io/istio/examples-bookinfo-reviews-v3:1.20.2'
       ports: {
